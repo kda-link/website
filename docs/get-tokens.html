@@ -70,55 +70,76 @@
 		                        <h1 class="large mb64 mb-xs-24">Get KTokens</h1>
 		                        <form class="form-email" data-success="Token request sent" data-error="Error sending token request">
 		                            <div class="row">
-		                                <div class="select-option col-sm-12 p0">
-		                                    <i class="ti-angle-down"></i>
-		                                    <select class="validate-required" name="currency">
-		                                        <option selected="selected" value="1">BTC</option>
-		                                        <option value="2">ETH</option>
-		                                        <option value="3">DAI</option>
-		                                        <option value="4">CGLD</option>
-		                                    </select>
+		                                <div class="col-sm-12 p0">
+                                        <div class="input-with-label text-left">
+                                            <span>Node Address</span>
+		                                        <input type="text" class="validate-required" name="node-address" value="localhost:4443">
+                                        </div>
+		                                </div>
+		                            </div>
+
+		                            <div class="row">
+                                    <div class="input-with-label text-left">
+                                        <span>Token Type</span>
+		                                    <div class="select-option col-sm-12 p0">
+		                                        <i class="ti-angle-down"></i>
+		                                        <select name="currency">
+		                                            <option selected="selected" value="1">KBTC</option>
+		                                            <option value="2">KETH</option>
+		                                            <option value="3">KDAI</option>
+		                                            <option value="4">KCGLD</option>
+		                                        </select>
+		                                    </div>
 		                                </div>
 		                            </div>
 
 		                            <div class="row">
 		                                <div class="col-sm-12 p0">
-		                                    <input type="text" class="validate-required" name="sending-address" placeholder="Sending Address">
+                                        <div class="input-with-label text-left">
+                                            <span>Sending Address</span>
+		                                        <input type="text" class="validate-required" name="sending-address">
+                                        </div>
 		                                </div>
 		                            </div>
 
 		                            <div class="row">
 		                                <div class="col-sm-12 p0">
-		                                    <input type="text" class="validate-required" name="sending-address" placeholder="Public Key or TxBuilder on Kadena">
+                                        <div class="input-with-label text-left">
+                                            <span>Public Key or TxBuilder on Kadena</span>
+		                                        <input type="text" class="validate-required" name="sending-address">
+                                        </div>
 		                                </div>
 		                            </div>
 
 		                            <div class="row">
-		                                <div class="select-option col-sm-12 p0">
-		                                    <i class="ti-angle-down"></i>
-		                                    <select class="validate-required" name="distribution">
-		                                        <option selected="selected" value="all">All Chains</option>
-		                                        <option value="0">Chain 0</option>
-		                                        <option value="1">Chain 1</option>
-		                                        <option value="2">Chain 2</option>
-		                                        <option value="3">Chain 3</option>
-		                                        <option value="4">Chain 4</option>
-		                                        <option value="5">Chain 5</option>
-		                                        <option value="6">Chain 6</option>
-		                                        <option value="7">Chain 7</option>
-		                                        <option value="8">Chain 8</option>
-		                                        <option value="9">Chain 9</option>
-		                                        <option value="10">Chain 10</option>
-		                                        <option value="11">Chain 11</option>
-		                                        <option value="12">Chain 12</option>
-		                                        <option value="13">Chain 13</option>
-		                                        <option value="14">Chain 14</option>
-		                                        <option value="15">Chain 15</option>
-		                                        <option value="16">Chain 16</option>
-		                                        <option value="17">Chain 17</option>
-		                                        <option value="18">Chain 18</option>
-		                                        <option value="19">Chain 19</option>
-		                                    </select>
+                                    <div class="input-with-label text-left">
+                                        <span>Chain(s) where tokens will reside</span>
+		                                    <div class="select-option col-sm-12 p0">
+		                                        <i class="ti-angle-down"></i>
+		                                        <select name="distribution">
+		                                            <option selected="selected" value="all">All Chains</option>
+		                                            <option value="0">Chain 0</option>
+		                                            <option value="1">Chain 1</option>
+		                                            <option value="2">Chain 2</option>
+		                                            <option value="3">Chain 3</option>
+		                                            <option value="4">Chain 4</option>
+		                                            <option value="5">Chain 5</option>
+		                                            <option value="6">Chain 6</option>
+		                                            <option value="7">Chain 7</option>
+		                                            <option value="8">Chain 8</option>
+		                                            <option value="9">Chain 9</option>
+		                                            <option value="10">Chain 10</option>
+		                                            <option value="11">Chain 11</option>
+		                                            <option value="12">Chain 12</option>
+		                                            <option value="13">Chain 13</option>
+		                                            <option value="14">Chain 14</option>
+		                                            <option value="15">Chain 15</option>
+		                                            <option value="16">Chain 16</option>
+		                                            <option value="17">Chain 17</option>
+		                                            <option value="18">Chain 18</option>
+		                                            <option value="19">Chain 19</option>
+		                                        </select>
+		                                    </div>
 		                                </div>
 		                            </div>
 
