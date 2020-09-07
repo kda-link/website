@@ -43,10 +43,16 @@
 		                             <a href="#contact" class="inner-link" target="_self">Contact</a>
 		                             </li> -->
                             <li class="vpf">
-		                            <a href="get-tokens.html" class="inner-link" target="_self">Get KTokens</a>
+		                            <a href="index.html">What is kda.link?</a>
 		                        </li>
                             <li class="vpf">
-		                            <a href="redeem-tokens.html" class="inner-link" target="_self">Redeem KTokens</a>
+		                            <a href="proof-of-assets.html">Proof of Assets</a>
+		                        </li>
+                            <li class="vpf">
+		                            <a href="get-tokens.html">Get KTokens</a>
+		                        </li>
+                            <li class="vpf">
+		                            <a href="redeem-tokens.html" class="color-primary">Redeem KTokens</a>
 		                        </li>
 
 
@@ -69,6 +75,15 @@
 		                    <div class="col-sm-6 col-sm-offset-3 p0">
 		                        <h1 class="large mb64 mb-xs-24">Redeem KTokens</h1>
 		                        <form class="form-email" data-success="Token request sent" data-error="Error sending token request">
+		                            <div class="row">
+		                                <div class="col-sm-12 p0">
+                                        <div class="input-with-label text-left">
+                                            <span>Node Address</span>
+		                                        <input type="text" class="validate-required" name="node-address" value="localhost:4443">
+                                        </div>
+		                                </div>
+		                            </div>
+
 		                            <div class="row">
                                     <div class="input-with-label text-left">
                                         <span>Token Type</span>
@@ -119,10 +134,11 @@
 
 		                            <div class="row">
                                     <div class="input-with-label text-left">
-                                        <span>Chain</span>
+                                        <span>Chain(s) to withdraw from</span>
 		                                    <div class="select-option col-sm-12 p0">
 		                                        <i class="ti-angle-down"></i>
 		                                        <select name="distribution">
+                                                <!-- TODO This chain list should be dynamically queried from the node -->
 		                                            <option selected="selected" value="all">Spread Across All Chains</option>
 		                                            <option value="0">Chain 0</option>
 		                                            <option value="1">Chain 1</option>
