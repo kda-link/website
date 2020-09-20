@@ -1,1 +1,9 @@
 /****** PLACE YOUR CUSTOM STYLES HERE ******/
+
+.cursor-clickable {
+    cursor: pointer!important;
+}
+
+.invisible {
+    display: none;
+}
