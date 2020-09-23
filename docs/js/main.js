@@ -140,15 +140,22 @@ Vue.component('accordion', {
     }
 });
 
+const allTokens = {
+    "BTC" : { "fee": 0.002, "min": 0.01 },
+    "ETH" : { "fee": 0.002, "min": 0.3 },
+    "DAI" : { "fee": 0.002, "min": 100 },
+    "USDC" : { "fee": 0.002, "min": 100 }
+}
+
+var app = new Vue({
+    el: '#app'
+});
+
 var mintApp = new Vue({
     el: '#mintApp',
     data: {
         stage: 0,
-        tokens: { "BTC" : { "fee": 0.002, "min": 0.01 },
-                  "ETH" : { "fee": 0.002, "min": 0.3 },
-                  "DAI" : { "fee": 0.002, "min": 100 },
-                  "USDC" : { "fee": 0.002, "min": 100 }
-                },
+        tokens: allTokens,
         tokenType: "BTC",
         node: "http://localhost:4443",
         txb: null,
@@ -179,7 +186,48 @@ var mintApp = new Vue({
             res.then(v => {this.requestId = v.result.data['request-id']; this.stage += 1;},
                      e => {this.errMsg = 'Error contacting node (' + e + ')'; });
         },
+        sendMintRequest() {
+            Pact.fetch.send(this.cmd, this.node);
+            this.stage += 1;
+        }
+    }
+});
 
+var redeemApp = new Vue({
+    el: '#redeemApp',
+    data: {
+        stage: 0,
+        tokens: allTokens,
+        tokenType: "BTC",
+        node: "http://localhost:4443",
+        txb: null,
+        cmd: null,
+        requestId: null,
+        errMsg: null
+    },
+    computed: {
+        txFeePercent() {
+            return this.tokens[this.tokenType]["fee"] * 100.0;
+        },
+        txMin() {
+            return this.tokens[this.tokenType]["min"];
+        }
+    },
+    methods: {
+        prepareMintRequest() {
+            const d = new Date();
+            const dStr = d.toISOString();
+            const code = '(kbtc.buy-token "' + this.txb.account + '" (read-keyset "ks") "' + dStr + '")';
+            this.cmd = {
+                    "pactCode": code,
+                    "envData": {"ks": this.txb.keyset}
+            };
+            // TODO properly get the chainwebversion and the chain ID
+            //var res = Pact.fetch.local(this.cmd, this.node + '/chainweb/0.0/mainnet01/chain/0/pact');
+            var res = Pact.fetch.local(this.cmd, this.node);
+            res.then(v => {this.requestId = v.result.data['request-id']; this.stage += 1;},
+                     e => {this.errMsg = 'Error contacting node (' + e + ')'; });
+        },
         sendMintRequest() {
             Pact.fetch.send(this.cmd, this.node);
             this.stage += 1;
