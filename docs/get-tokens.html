@@ -39,14 +39,14 @@
                                         <div class="col-sm-6 p0">
                                             <div class="input-with-label text-left">
                                                 <span>Min Transaction Size</span>
-                                                <div>{{tokens[tokenType]["min"]}} {{tokenType}}</div>
+                                                <div>{{txMin}} {{tokenType}}</div>
                                                 <br/>
                                             </div>
                                         </div>
                                         <div class="col-sm-6 p0">
                                             <div class="input-with-label text-left">
                                                 <span>Fee</span>
-                                                <div>{{tokens[tokenType]["fee"] * 100.0}}%</div>
+                                                <div>{{txFeePercent}}%</div>
                                                 <br/>
                                             </div>
                                         </div>
@@ -111,7 +111,11 @@
 		                                    </accordion>
                                     </div>
 
-                                    <br/>
+                                    <div v-if="errMsg != null" class="row submit-error">
+                                        <div class="col-sm-12 p0">
+                                            <div>{{errMsg}}</div>
+                                        </div>
+                                    </div>
 
 		                                <div class="row">
 		                                    <div class="col-sm-12 p0">
@@ -130,7 +134,7 @@
                                 <p>Your token mint request is ready to be sent.</p>
                                 <dl>
                                     <dt>Fee</dt>
-                                    <dd>0.2%</dd>
+                                    <dd>{{txFeePercent}}%</dd>
 
                                     <dt>Min Transaction Amount</dt>
                                     <dd>{{txMin}} {{tokenType}}</dd>
@@ -172,10 +176,10 @@
 
                                 <dl>
                                     <dt>Fee</dt>
-                                    <dd>0.2%</dd>
+                                    <dd>{{txFeePercent}}%</dd>
 
                                     <dt>Min Transaction Amount</dt>
-                                    <dd>0.01 {{tokenType}}</dd>
+                                    <dd>{{txMin}} {{tokenType}}</dd>
 
                                     <dt>Transaction Note (also called a nonce)</dt>
                                     <dd>{{requestId}}</dd>

@@ -12,3 +12,10 @@ button:disabled {
     background-color: #666!important;
     border-color: #666!important;
 }
+
+.submit-error {
+    background: #ce3838;
+    color: #fff;
+    padding: 20px;
+    margin-bottom: 24px;
+}
