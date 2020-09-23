@@ -29,20 +29,34 @@
 		                                        <div class="select-option col-sm-12 p0">
 		                                            <i class="ti-angle-down"></i>
 		                                            <select v-model="tokenType" name="currency">
-		                                                <option selected="selected" value="BTC">KBTC</option>
-		                                                <option value="ETH">KETH</option>
-		                                                <option value="DAI">KDAI</option>
-		                                                <option value="CGLD">KCGLD</option>
+		                                                <option v-for="(v,k) in tokens" :value="k">K{{k}}</option>
 		                                            </select>
 		                                        </div>
 		                                    </div>
 		                                </div>
 
                                     <div class="row">
+                                        <div class="col-sm-6 p0">
+                                            <div class="input-with-label text-left">
+                                                <span>Min Transaction Size</span>
+                                                <div>{{tokens[tokenType]["min"]}} {{tokenType}}</div>
+                                                <br/>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 p0">
+                                            <div class="input-with-label text-left">
+                                                <span>Fee</span>
+                                                <div>{{tokens[tokenType]["fee"] * 100.0}}%</div>
+                                                <br/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
                                         <div class="col-sm-12 p0">
                                             <div class="input-with-label text-left">
                                                 <span>Public Key or TxBuilder on Kadena</span>
-                                                <input v-model="keyset" type="text" name="sending-address">
+                                                <txb-input v-model="txb"></txb-input>
                                             </div>
                                         </div>
                                     </div>
@@ -101,7 +115,10 @@
 
 		                                <div class="row">
 		                                    <div class="col-sm-12 p0">
-		                                        <button v-on:click="prepareMintRequest()" type="submit">Prepare Token Mint Request</button>
+                                            <button type="submit"
+                                                    v-on:click="prepareMintRequest()"
+                                                    v-bind:class="txb == null ? 'disabled' : ''"
+                                                    v-bind:disabled="txb == null">Prepare Token Mint Request</button>
 		                                    </div>
 		                                </div>
                             </div>
@@ -116,13 +133,19 @@
                                     <dd>0.2%</dd>
 
                                     <dt>Min Transaction Amount</dt>
-                                    <dd>0.01 {{tokenType}}</dd>
+                                    <dd>{{txMin}} {{tokenType}}</dd>
+
+                                    <dt>Your K{{tokenType}} will be owned by</dt>
+                                    <dd style="margin-left: 12px;">
+                                        <strong>Account</strong>: {{txb == null ? '' : txb.account}}
+                                        <br/>
+                                        <strong>Keys</strong>: {{txb == null ? '' : txb.keyset.keys}}
+                                        <br/>
+                                        <strong>Predicate</strong>: {{txb == null ? '' : txb.keyset.pred}}
+                                    </dd>
 
                                     <dt>Transaction Note (also called a nonce)</dt>
                                     <dd>{{requestId}}</dd>
-
-                                    <dt>Your K{{tokenType}} will be owned by</dt>
-                                    <dd>{{keyset}}</dd>
                                 </dl>
                                 <p><strong>IMPORTANT</strong>: If you do not
                                 include the above note in your BTC transaction

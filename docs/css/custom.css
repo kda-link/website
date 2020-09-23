@@ -7,3 +7,8 @@
 .invisible {
     display: none;
 }
+
+button:disabled {
+    background-color: #666!important;
+    border-color: #666!important;
+}

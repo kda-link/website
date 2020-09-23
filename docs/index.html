@@ -14,60 +14,9 @@
     </head>
     <body>
 
-        <!-- Manually disabled the updateNav function in scripts.js because the nav
-             would sometimes not be visible when it should. Added the attributes
-             "fixed outOfSight scrolled" here to compensate.
-        -->
-		<div class="nav-container"><nav class="absolute bg-dark fixed outOfSight scrolled">
-		        <div class="nav-bar">
-		            <div class="module left">
-		                <a href="index.html" class="inner-link">
-                    <h3 style="height:55px;line-height:55px;">kda.link</h3>
-                    <!--
-		                    <div class="vnu"><img class="logo logo-light" alt="Foundry" src="img/logo-light.png"></div>
-		                    <div class="vnu"><img class="logo logo-dark" alt="Foundry" src="img/logo-dark.png"></div>
-                    -->
-		                </a>
-		            </div>
-		            <div class="module widget-handle mobile-toggle right visible-sm visible-xs">
-		                <i class="ti-menu"></i>
-		            </div>
-		            <div class="module-group right">
-		                <div class="module left">
-		                    <ul class="menu">
-		                        <!-- <li>
-		                             <a href="#about" class="inner-link" target="_self">About</a>
-		                             </li>
-                                 <li class="vpf">
-		                             <a href="#projects" class="inner-link" target="_self">Projects</a>
-		                             </li>
-                                 <li class="vpf">
-		                             <a href="#contact" class="inner-link" target="_self">Contact</a>
-		                             </li> -->
-                            <li class="vpf">
-		                            <a href="index.html" class="color-primary">What is kda.link?</a>
-		                        </li>
-                            <li class="vpf">
-		                            <a href="proof-of-assets.html">Proof of Assets</a>
-		                        </li>
-                            <li class="vpf">
-		                            <a href="get-tokens.html">Get KTokens</a>
-		                        </li>
-                            <li class="vpf">
-		                            <a href="redeem-tokens.html">Redeem KTokens</a>
-		                        </li>
+        <div id="mintApp">
 
-
-		                    </ul>
-		                </div>
-
-
-		            </div>
-
-		        </div>
-		    </nav>
-		</div>
-
+            <sitenav></sitenav>
 		<div class="main-container">
 		<a id="top" class="in-page-link"></a>
 
@@ -252,12 +201,15 @@
 					</div>
 				</div>
 			</footer></div>
+				</div>
 
 
-	<script src="js/jquery.min.js"></script>
+	      <script src="js/jquery.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
         <script src="js/smooth-scroll.min.js"></script>
         <script src="js/parallax.js"></script>
         <script src="js/scripts.js"></script>
+	      <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	      <script src="js/main.js"></script>
     </body>
 </html>

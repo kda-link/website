@@ -1,3 +1,76 @@
+var testtxb = {
+    "keyset": {
+        "pred": "keys-all",
+        "keys": [
+            "d17a42b42f76eb0fb3e400b5e06d763692ff44d7d9b4c05c8c21bac80085bad7"
+        ]
+    },
+    "account": "asami",
+    "chain": "0"
+};
+
+Vue.component('txb-input', {
+    props: ['value'],
+    template: `
+      <div v-bind:class="this.isError() ? 'attempted-submit' : ''">
+        <input type="text"
+               ref="rawTxb"
+               :value="txbToString(value)"
+               @input="updateInput()"
+               v-bind:class="this.isError() ? 'field-error' : ''">
+      </div>
+    `,
+    methods: {
+        stringToTxb(v) {
+            var txb = null;
+            try {
+                var raw = JSON.parse(v);
+                if ( raw != null ) {
+                  if ( typeof raw.account === "undefined" ) {
+                      throw "no account";
+                  }
+                    if ( typeof raw.keyset === "undefined" ) {
+                        throw "no keyset";
+                    }
+                  if ( typeof raw.keyset.pred === "undefined" ) {
+                      throw "no pred";
+                  }
+                  if ( typeof raw.keyset.keys === "undefined" ) {
+                      throw "no keys";
+                  }
+                    txb = { "account": raw.account,
+                            "keyset": raw.keyset
+                          };
+                }
+            } catch (e) {
+                if ( v != null ) {
+                    var pubkey = v.match(/^[a-fA-F0-9]{64}$/);
+                    if ( pubkey != null ) {
+                        txb = { "account": v,
+                                "keyset": { "keys": [v], "pred": "keys-all" }
+                              };
+                    }
+                }
+            }
+            return txb;
+        },
+        txbToString(txb) {
+            if ( txb == null )
+                return '';
+            else if ( txb.keyset.pred == "keys-all" && txb.keyset.keys.length == 1 && txb.keyset.keys[0] == txb.account ) {
+                return txb.account;
+            } else {
+                return JSON.stringify(txb);
+            }
+        },
+        updateInput() {
+            this.$emit('input', this.stringToTxb(this.$refs.rawTxb.value));
+        },
+        isError: function() {
+            return this.value == null && this.$refs.rawTxb != undefined && this.$refs.rawTxb.value != null && this.$refs.rawTxb.value != '';
+        }
+    }
+});
 Vue.component('sitenav', {
     props: [],
     // Manually disabled the updateNav function in scripts.js because the nav
@@ -70,10 +143,20 @@ var mintApp = new Vue({
     el: '#mintApp',
     data: {
         stage: 0,
+        tokens: { "BTC" : { "fee": 0.002, "min": 0.01 },
+                  "ETH" : { "fee": 0.002, "min": 0.3 },
+                  "DAI" : { "fee": 0.002, "min": 100 },
+                  "USDC" : { "fee": 0.002, "min": 100 }
+                },
         tokenType: "BTC",
         node: "http://localhost:4443",
-        keyset: "",
+        txb: null,
         requestId: null
+    },
+    computed: {
+        txMin() {
+            return this.tokens[this.tokenType]["min"];
+        }
     },
     methods: {
         prepareMintRequest() {
@@ -86,7 +169,6 @@ var mintApp = new Vue({
                 ]
             };
             const code = '(kbtc.buy-token "asami" (read-keyset "ks") "' + dStr + '")';
-            console.log(code);
             const cmd = {
                     "pactCode": code,
                     "envData": {"ks": ks}
