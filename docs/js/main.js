@@ -234,3 +234,50 @@ var redeemApp = new Vue({
         }
     }
 });
+
+var poaApp = new Vue({
+  el: '#poaApp',
+  data: {
+    btcAmount: "loading...",
+    btcAddress: "35hK24tcLEWcgNA4JxpvbkNkoAcDGqQPsP",
+    kbtcAmount: "loading...",
+    kbtcAddress: "kbtc",
+    node: "http://localhost:4443",
+  },
+  computed: {
+      btcLink() {
+          return "https://blockstream.info/address/" + this.btcAddress;
+      },
+      kbtcLink() {
+          return "https://explorer.chainweb.com/mainnet/chain/0/block/YoGUKi0Tq2Owg0nL7PDkcVLj6GTBSGCEUB-NQmmQn7U=/txs";
+      }
+  },
+  methods: {
+    async getBtcBalance() {
+      try {
+        var res = await fetch('https://blockchain.info/de/q/addressbalance/' + this.btcAddress);
+        var amountSats = await res.json()
+        this.btcAmount = amountSats / 1000000
+      } catch (e) {
+        this.btcAmount = 'Error contacting node (' + e + ')'
+      }
+
+    },
+    async getKbtcCirculation() {
+      const code = '(' + this.kbtcAddress + ".get-total" + ')';
+      const cmd = {
+        "pactCode": code
+      }
+      try {
+        var res = await Pact.fetch.local(cmd, this.node);
+        this.kbtcAmount = res.result.data['total-circulation']
+      } catch (e) {
+        this.kbtcAmount = 'Error contacting node (' + e + ')';
+      }
+    }
+  },
+  beforeMount(){
+    this.getKbtcCirculation();
+    this.getBtcBalance();
+ },
+})

@@ -14,7 +14,7 @@
     </head>
     <body>
 
-        <div id="app">
+        <div id="poaApp">
 
             <sitenav></sitenav>
 		        <div class="main-container">
@@ -28,18 +28,22 @@
                                     <table class="col-sm-12">
                                         <thead>
                                             <tr>
-                                                <th>Adress</th>
+                                                <th>Type</th>
+                                                <th>Address</th>
                                                 <th>Balance</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><a href="https://blockstream.info/address/1Ni2mG3j5zMyYrJ6gD7XjTgYC4KEeTeniX">1Ni2mG3j5zMyYrJ6gD7XjTgYC4KEeTeniX</a> (Site under construction, not actual assets)</td>
-                                                <td>1234.56</td>
+                                            <tr style="padding-bottom:10px">
+                                                <td style="padding-right:10px">BTC  <br/> (custody)</td>
+                                                <td style="padding-right:10px"><a :href="btcLink">{{btcAddress}}</a></td>
+                                                <td>{{btcAmount}}</td>
                                             </tr>
                                             <tr>
-                                                <td><a href="https://blockstream.info/address/1GH7sAETcEZLuz17ZiijaqSYNfEPKRLWcu">1GH7sAETcEZLuz17ZiijaqSYNfEPKRLWcu</a> (Site under construction, not actual assets)</td>
-                                                <td>987.65</td>
+                                                <td style="padding-right:10px">kBTC <br/> (circulation)</td>
+                                                <!-- NOTE: change to real contract code -->
+                                                <td style="padding-right:10px"><a :href="kbtcLink">{{kbtcAddress}} contract</a></td>
+                                                <td>{{kbtcAmount}}</td>
                                             </tr>
                                         </tbody>
                                     </table>
