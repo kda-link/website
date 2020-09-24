@@ -244,6 +244,14 @@ var poaApp = new Vue({
     kbtcAddress: "kbtc",
     node: "http://localhost:4443",
   },
+  computed: {
+      btcLink() {
+          return "https://blockstream.info/address/" + this.btcAddress;
+      },
+      kbtcLink() {
+          return "https://explorer.chainweb.com/mainnet/chain/0/block/YoGUKi0Tq2Owg0nL7PDkcVLj6GTBSGCEUB-NQmmQn7U=/txs";
+      }
+  },
   methods: {
     async getBtcBalance() {
       try {

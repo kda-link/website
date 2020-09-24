@@ -36,13 +36,13 @@
                                         <tbody>
                                             <tr style="padding-bottom:10px">
                                                 <td style="padding-right:10px">BTC  <br/> (custody)</td>
-                                                <td style="padding-right:10px"><a href="https://blockstream.info/address/1Ni2mG3j5zMyYrJ6gD7XjTgYC4KEeTeniX">{{btcAddress}}</a></td>
+                                                <td style="padding-right:10px"><a :href="btcLink">{{btcAddress}}</a></td>
                                                 <td>{{btcAmount}}</td>
                                             </tr>
                                             <tr>
                                                 <td style="padding-right:10px">kBTC <br/> (circulation)</td>
                                                 <!-- NOTE: change to real contract code -->
-                                                <td style="padding-right:10px"><a href="https://explorer.chainweb.com/mainnet/chain/0/block/YoGUKi0Tq2Owg0nL7PDkcVLj6GTBSGCEUB-NQmmQn7U=/txs">{{kbtcAddress}} contract</a></td>
+                                                <td style="padding-right:10px"><a :href="kbtcLink">{{kbtcAddress}} contract</a></td>
                                                 <td>{{kbtcAmount}}</td>
                                             </tr>
                                         </tbody>
