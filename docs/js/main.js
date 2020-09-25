@@ -16,7 +16,8 @@ Vue.component('btc-address-input', {
       <div v-bind:class="this.isError() ? 'attempted-submit' : ''">
         <input type="text"
                ref="rawAddress"
-               v-model="value"
+               v-bind:value="value"
+               v-on:input="$emit('input', $event.target.value)"
                v-bind:class="this.isError() ? 'field-error' : ''">
       </div>
     `,
@@ -32,7 +33,6 @@ Vue.component('btc-address-input', {
         isError: function() {
             const err = !this.isValidBtcAddress(this.value);
             const res = err && this.$refs.rawAddress != undefined && this.$refs.rawAddress.value != null && this.$refs.rawAddress.value != '';
-            console.log('isError returning ' + res);
             return res;
         }
     }
@@ -232,7 +232,10 @@ var redeemApp = new Vue({
         tokens: allTokens,
         tokenType: "BTC",
         node: "http://localhost:4443",
-        btcAddress: null,
+        sendingAccount: null,
+        receivingAddress: null,
+        amount: null,
+        sendMax: false,
         cmd: null,
     },
     computed: {
@@ -244,6 +247,11 @@ var redeemApp = new Vue({
         }
     },
     methods: {
+        formValid() {
+            return this.receivingAddress != null
+                && this.sendingAccount != null
+                && ((this.amount != null && this.amount != '') || this.sendMax);
+        },
         prepareRedeem() {
             const d = new Date();
             const dStr = d.toISOString();

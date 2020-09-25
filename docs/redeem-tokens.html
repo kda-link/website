@@ -23,9 +23,12 @@
 		            <section>
 		                <div class="container">
 		                    <div class="feature">
-		                        <div class="row">
+
+                            <div class="row">
 		                            <div class="col-sm-6 col-sm-offset-3 p0">
 		                                <h1 class="large mb64 mb-xs-24">Redeem KTokens</h1>
+
+		                                <div v-bind:class="stage == 0 ? '' : 'invisible'">
 		                                    <div class="row">
                                             <div class="input-with-label text-left">
                                                 <span>Token Type</span>
@@ -59,7 +62,7 @@
 		                                        <div class="col-sm-12 p0">
                                                 <div class="input-with-label text-left">
                                                     <span>Sending KToken Account Name</span>
-		                                                <input type="text" class="validate-required" name="ktoken-account">
+		                                                <input v-model="sendingAccount" type="text" name="ktoken-account">
                                                 </div>
 		                                        </div>
 		                                    </div>
@@ -68,7 +71,7 @@
 		                                        <div class="col-sm-12 p0">
                                                 <div class="input-with-label text-left">
                                                     <span>Receiving {{tokenType}} Address</span>
-		                                                <btc-address-input v-model="btcAddress"></btc-address-input>
+		                                                <btc-address-input v-model="receivingAddress"></btc-address-input>
                                                 </div>
 		                                        </div>
 		                                    </div>
@@ -77,75 +80,83 @@
 		                                        <div class="col-sm-11 p0">
                                                 <div class="input-with-label text-left">
                                                     <span>Amount</span>
-		                                                <input type="text" class="validate-required" name="amount">
+		                                                <input v-model="amount" type="text" name="amount">
                                                 </div>
 		                                        </div>
 		                                        <div class="col-sm-1 p0">
                                                 <div class="input-with-label text-center">
                                                     <span>Max</span>
-		                                                <input type="checkbox" name="max">
+		                                                <input v-model="sendMax" type="checkbox" name="max">
                                                 </div>
 		                                        </div>
 		                                    </div>
 
-                                    <div class="row">
-                                        <accordion title="Advanced">
-                                            <div class="col-sm-12">
-                                                <br/>
-                                                <div class="row">
-                                                    <div class="col-sm-12 p0">
-                                                        <div class="input-with-label text-left">
-                                                            <span>Node Address</span>
-                                                            <input v-model="node" type="text" name="node-address">
+                                        <div class="row">
+                                            <accordion title="Advanced">
+                                                <div class="col-sm-12">
+                                                    <br/>
+                                                    <div class="row">
+                                                        <div class="col-sm-12 p0">
+                                                            <div class="input-with-label text-left">
+                                                                <span>Node Address</span>
+                                                                <input v-model="node" type="text" name="node-address">
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                        <!-- TODO This chain list should be dynamically queried from the node
-		                                    <div class="row">
-                                            <div class="input-with-label text-left">
-                                                <span>Chain(s) to withdraw from</span>
-		                                            <div class="select-option col-sm-12 p0">
-		                                                <i class="ti-angle-down"></i>
-		                                                <select name="distribution">
-		                                                    <option selected="selected" value="all">Spread Across All Chains</option>
-		                                                    <option value="0">Chain 0</option>
-		                                                    <option value="1">Chain 1</option>
-		                                                    <option value="2">Chain 2</option>
-		                                                    <option value="3">Chain 3</option>
-		                                                    <option value="4">Chain 4</option>
-		                                                    <option value="5">Chain 5</option>
-		                                                    <option value="6">Chain 6</option>
-		                                                    <option value="7">Chain 7</option>
-		                                                    <option value="8">Chain 8</option>
-		                                                    <option value="9">Chain 9</option>
-		                                                    <option value="10">Chain 10</option>
-		                                                    <option value="11">Chain 11</option>
-		                                                    <option value="12">Chain 12</option>
-		                                                    <option value="13">Chain 13</option>
-		                                                    <option value="14">Chain 14</option>
-		                                                    <option value="15">Chain 15</option>
-		                                                    <option value="16">Chain 16</option>
-		                                                    <option value="17">Chain 17</option>
-		                                                    <option value="18">Chain 18</option>
-		                                                    <option value="19">Chain 19</option>
-		                                                </select>
+                                                    <!-- TODO This chain list should be dynamically queried from the node
+		                                                     <div class="row">
+                                                         <div class="input-with-label text-left">
+                                                         <span>Chain(s) to withdraw from</span>
+		                                                     <div class="select-option col-sm-12 p0">
+		                                                     <i class="ti-angle-down"></i>
+		                                                     <select name="distribution">
+		                                                     <option selected="selected" value="all">Spread Across All Chains</option>
+		                                                     <option value="0">Chain 0</option>
+		                                                     <option value="1">Chain 1</option>
+		                                                     <option value="2">Chain 2</option>
+		                                                     <option value="3">Chain 3</option>
+		                                                     <option value="4">Chain 4</option>
+		                                                     <option value="5">Chain 5</option>
+		                                                     <option value="6">Chain 6</option>
+		                                                     <option value="7">Chain 7</option>
+		                                                     <option value="8">Chain 8</option>
+		                                                     <option value="9">Chain 9</option>
+		                                                     <option value="10">Chain 10</option>
+		                                                     <option value="11">Chain 11</option>
+		                                                     <option value="12">Chain 12</option>
+		                                                     <option value="13">Chain 13</option>
+		                                                     <option value="14">Chain 14</option>
+		                                                     <option value="15">Chain 15</option>
+		                                                     <option value="16">Chain 16</option>
+		                                                     <option value="17">Chain 17</option>
+		                                                     <option value="18">Chain 18</option>
+		                                                     <option value="19">Chain 19</option>
+		                                                     </select>
+		                                                     </div>
+		                                                     </div>
+		                                                     </div>
+                                                    -->
+
 		                                            </div>
-		                                        </div>
-		                                    </div>
-                                        -->
-
-		                                        </div>
-		                                    </accordion>
-                                    </div>
+		                                        </accordion>
+                                        </div>
 
 		                                    <div class="row">
 		                                        <div class="col-sm-12 p0">
-		                                            <button type="submit">Redeem Tokens</button>
+                                                <button type="submit"
+                                                        v-on:click="prepareRedeem()"
+                                                        v-bind:class="formValid() ? '' : 'disabled'"
+                                                        v-bind:disabled="!formValid()">Redeem Tokens</button>
 		                                        </div>
 		                                    </div>
+                                    </div> <!-- Stage 0 component -->
+
+		                                <div v-bind:class="stage == 1 ? '' : 'invisible'">
+                                    </div> <!-- Stage 1 component -->
                                 </div>
                             </div>
+
 		                    </div>
 
 		                </div>
