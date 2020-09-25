@@ -8,6 +8,35 @@ var testtxb = {
     "account": "susan",
     "chain": "0"
 };
+const testBtcAddress = '18saK8RSUfaF24wvwepLoQLT2wCJ8DazwJ';
+
+Vue.component('btc-address-input', {
+    props: ['value'],
+    template: `
+      <div v-bind:class="this.isError() ? 'attempted-submit' : ''">
+        <input type="text"
+               ref="rawAddress"
+               v-model="value"
+               v-bind:class="this.isError() ? 'field-error' : ''">
+      </div>
+    `,
+    methods: {
+        isValidBtcAddress(v) {
+            if ( v != null ) {
+                var addr = v.match(/^[13][1-9abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ]{24,33}$/);
+                return addr != null;
+            } else {
+                return false;
+            }
+        },
+        isError: function() {
+            const err = !this.isValidBtcAddress(this.value);
+            const res = err && this.$refs.rawAddress != undefined && this.$refs.rawAddress.value != null && this.$refs.rawAddress.value != '';
+            console.log('isError returning ' + res);
+            return res;
+        }
+    }
+});
 
 Vue.component('txb-input', {
     props: ['value'],
@@ -141,10 +170,10 @@ Vue.component('accordion', {
 });
 
 const allTokens = {
-    "BTC" : { "fee": 0.002, "min": 0.01 },
-    "ETH" : { "fee": 0.002, "min": 0.3 },
-    "DAI" : { "fee": 0.002, "min": 100 },
-    "USDC" : { "fee": 0.002, "min": 100 }
+    "BTC" : { "fee": 0.002, "min": 0.01, "address": "mgM9CyJ5PLxKcr1sEXsjR7G4hdUM9j1qpq" },
+    "ETH" : { "fee": 0.002, "min": 0.3, "address": "not implemented yet" },
+    "DAI" : { "fee": 0.002, "min": 100, "address": "not implemented yet" },
+    "USDC" : { "fee": 0.002, "min": 100, "address": "not implemented yet" }
 }
 
 var app = new Vue({
@@ -164,6 +193,9 @@ var mintApp = new Vue({
         errMsg: null
     },
     computed: {
+        sendToAddress() {
+            return this.tokens[this.tokenType]["address"];
+        },
         txFeePercent() {
             return this.tokens[this.tokenType]["fee"] * 100.0;
         },
@@ -200,10 +232,8 @@ var redeemApp = new Vue({
         tokens: allTokens,
         tokenType: "BTC",
         node: "http://localhost:4443",
-        txb: null,
+        btcAddress: null,
         cmd: null,
-        requestId: null,
-        errMsg: null
     },
     computed: {
         txFeePercent() {
@@ -214,10 +244,10 @@ var redeemApp = new Vue({
         }
     },
     methods: {
-        prepareMintRequest() {
+        prepareRedeem() {
             const d = new Date();
             const dStr = d.toISOString();
-            const code = '(kbtc.buy-token "' + this.txb.account + '" (read-keyset "ks") "' + dStr + '")';
+            const code = '(kbtc.sell-token "' + this.txb.account + '" (read-keyset "ks") "' + dStr + '")';
             this.cmd = {
                     "pactCode": code,
                     "envData": {"ks": this.txb.keyset}
@@ -239,7 +269,7 @@ var poaApp = new Vue({
   el: '#poaApp',
   data: {
     btcAmount: "loading...",
-    btcAddress: "35hK24tcLEWcgNA4JxpvbkNkoAcDGqQPsP",
+    btcAddress: allTokens["BTC"]["address"],
     kbtcAmount: "loading...",
     kbtcAddress: "kbtc",
     node: "http://localhost:4443",
@@ -255,7 +285,9 @@ var poaApp = new Vue({
   methods: {
     async getBtcBalance() {
       try {
-        var res = await fetch('https://blockchain.info/de/q/addressbalance/' + this.btcAddress);
+        //var res = await fetch('https://blockchain.info/de/q/addressbalance/' + this.btcAddress);
+        // Hard code this for now so that we have a balance but aren't at risk of people sending to the wrong address.
+        var res = await fetch('https://blockchain.info/de/q/addressbalance/35hK24tcLEWcgNA4JxpvbkNkoAcDGqQPsP');
         var amountSats = await res.json()
         this.btcAmount = amountSats / 1000000
       } catch (e) {

@@ -31,21 +31,35 @@
                                                 <span>Token Type</span>
 		                                            <div class="select-option col-sm-12 p0">
 		                                                <i class="ti-angle-down"></i>
-		                                                <select name="token-type">
-		                                                    <option selected="selected" value="1">KBTC</option>
-		                                                    <option value="2">KETH</option>
-		                                                    <option value="3">KDAI</option>
-		                                                    <option value="4">KCGLD</option>
+		                                                <select v-model="tokenType" name="currency">
+		                                                    <option v-for="(v,k) in tokens" :value="k">K{{k}}</option>
 		                                                </select>
 		                                            </div>
 		                                        </div>
 		                                    </div>
 
+                                        <div class="row">
+                                            <div class="col-sm-6 p0">
+                                                <div class="input-with-label text-left">
+                                                    <span>Min Transaction Size</span>
+                                                    <div>{{txMin}} {{tokenType}}</div>
+                                                    <br/>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 p0">
+                                                <div class="input-with-label text-left">
+                                                    <span>Fee</span>
+                                                    <div>{{txFeePercent}}%</div>
+                                                    <br/>
+                                                </div>
+                                            </div>
+                                        </div>
+
 		                                    <div class="row">
 		                                        <div class="col-sm-12 p0">
                                                 <div class="input-with-label text-left">
-                                                    <span>Receiving Address</span>
-		                                                <input type="text" class="validate-required" name="receiving-address">
+                                                    <span>Sending KToken Account Name</span>
+		                                                <input type="text" class="validate-required" name="ktoken-account">
                                                 </div>
 		                                        </div>
 		                                    </div>
@@ -53,8 +67,8 @@
 		                                    <div class="row">
 		                                        <div class="col-sm-12 p0">
                                                 <div class="input-with-label text-left">
-                                                    <span>KToken Account Name</span>
-		                                                <input type="text" class="validate-required" name="ktoken-account">
+                                                    <span>Receiving {{tokenType}} Address</span>
+		                                                <btc-address-input v-model="btcAddress"></btc-address-input>
                                                 </div>
 		                                        </div>
 		                                    </div>
