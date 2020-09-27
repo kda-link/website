@@ -100,7 +100,8 @@ Vue.component('txb-input', {
         }
     }
 });
-Vue.component('sitenav', {
+
+Vue.component('site-nav', {
     props: [],
     // Manually disabled the updateNav function in scripts.js because the nav
     // would sometimes not be visible when it should. Added the attributes
@@ -138,6 +139,38 @@ Vue.component('sitenav', {
 		            </div>
 		        </nav>
 		    </div>
+    `
+});
+
+Vue.component('site-footer', {
+    props: [],
+    // Manually disabled the updateNav function in scripts.js because the nav
+    // would sometimes not be visible when it should. Added the attributes
+    // "fixed outOfSight scrolled" here to compensate.
+    template: `
+      <footer class="footer-2 bg-dark text-center-xs">
+			    <div class="container">
+			        <div class="row">
+			            <div class="col-sm-4">
+                      <h3 style="height:55px;line-height:55px;">kda.link</h3>
+			                <!-- <a href="#"><div class="vnu"><img class="image-xxs fade-half" alt="Pic" src="img/logo-light.png"></div></a> -->
+			            </div>
+
+			            <div class="col-sm-4 text-center">
+			                <span class="fade-half">
+			                    © Copyright 2020 kda.link - All Rights Reserved
+			                </span>
+			            </div>
+
+			            <div class="col-sm-4 text-right text-center-xs">
+			                <ul class="list-inline social-list">
+			                    <li><a href="#"><i class="ti-twitter-alt"></i></a></li>
+			                    <li><a href="#"><i class="ti ti-github"></i></a></li>
+			                </ul>
+			            </div>
+			        </div>
+			    </div>
+			</footer>
     `
 });
 
