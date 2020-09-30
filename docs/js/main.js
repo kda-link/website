@@ -270,6 +270,8 @@ var redeemApp = new Vue({
         amount: null,
         sendMax: false,
         cmd: null,
+        accountDetails: null,
+        errMsg: null
     },
     computed: {
         txFeePercent() {
@@ -283,7 +285,11 @@ var redeemApp = new Vue({
         formValid() {
             return this.receivingAddress != null
                 && this.sendingAccount != null
+                && this.errMsg === null
                 && ((this.amount != null && this.amount != '') || this.sendMax);
+        },
+        maxAmount() {
+          this.amount = this.accountDetails.balance;
         },
         prepareRedeem() {
             const d = new Date();
@@ -302,8 +308,31 @@ var redeemApp = new Vue({
         sendMintRequest() {
             Pact.fetch.send(this.cmd, this.node);
             this.stage += 1;
+        },
+        async getAccount() {
+          try {
+            cmd = {
+              "pactCode": `(kbtc.details ${JSON.stringify(this.sendingAccount)})`
+            }
+            var res  = await Pact.fetch.local(cmd, this.node)
+            if (res.result.status === 'success') {
+              this.accountDetails = res.result.data;
+              console.log(res.result.data.guard.keys)
+              this.errMsg = null;
+            } else {
+              this.errMsg = 'account does not exist';
+              this.accountDetails = null;
+            }
+          } catch (e) {
+            console.log(e)
+            this.errMsg = 'account does not exist'
+            this.accountDetails = null;
+          }
         }
-    }
+    },
+   //  beforeMount(){
+   //    this.getAccount();
+   // },
 });
 
 var poaApp = new Vue({
@@ -337,6 +366,7 @@ var poaApp = new Vue({
 
     },
     async getKbtcCirculation() {
+      //TODO implement get-total in smart contract
       const code = '(' + this.kbtcAddress + ".get-total" + ')';
       const cmd = {
         "pactCode": code

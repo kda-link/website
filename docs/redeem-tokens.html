@@ -62,10 +62,16 @@
 		                                        <div class="col-sm-12 p0">
                                                 <div class="input-with-label text-left">
                                                     <span>Sending KToken Account Name</span>
-		                                                <input v-model="sendingAccount" type="text" name="ktoken-account">
+		                                                <input v-model="sendingAccount" type="text" name="ktoken-account" @change="getAccount">
                                                 </div>
 		                                        </div>
 		                                    </div>
+
+                                        <div v-if="errMsg != null" class="row submit-error">
+                                            <div class="col-sm-12 p0">
+                                                <div>{{errMsg}}</div>
+                                            </div>
+                                        </div>
 
 		                                    <div class="row">
 		                                        <div class="col-sm-12 p0">
@@ -84,12 +90,28 @@
                                                 </div>
 		                                        </div>
 		                                        <div class="col-sm-1 p0">
-                                                <div class="input-with-label text-center">
-                                                    <span>Max</span>
-		                                                <input v-model="sendMax" type="checkbox" name="max">
+                                                <div class="input-with-label text-center" style="padding-top:24px;">
+                                                  <button
+                                                          type="submit"
+                                                          v-on:click="maxAmount()"
+                                                          v-bind:disabled="accountDetails === null">Max</button>
                                                 </div>
 		                                        </div>
 		                                    </div>
+
+                                        <div v-if="accountDetails != null">
+                                          <div class="row">
+                                              <div class="input-with-label text-left">
+                                                  <span>Public Keys</span>
+  		                                            <div class="select-option col-sm-12 p0">
+  		                                                <i class="ti-angle-down"></i>
+  		                                                <select v-model="tokenType" name="currency">
+  		                                                    <option v-for="(v,k) in accountDetails.guard.keys" :value="k">{{v}}</option>
+  		                                                </select>
+  		                                            </div>
+  		                                        </div>
+  		                                    </div>
+                                        </div>
 
                                         <div class="row">
                                             <accordion title="Advanced">
