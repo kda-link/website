@@ -61,7 +61,7 @@
 		                                    <div class="row">
 		                                        <div class="col-sm-12 p0">
                                                 <div class="input-with-label text-left">
-                                                    <span>Sending KToken Account Name</span>
+                                                    <span>Sending K{{tokenType}} Account Name</span>
 		                                                <input v-model="sendingAccount" type="text" name="ktoken-account" @change="getAccount">
                                                 </div>
 		                                        </div>
@@ -77,7 +77,7 @@
 		                                        <div class="col-sm-12 p0">
                                                 <div class="input-with-label text-left">
                                                     <span>Receiving {{tokenType}} Address</span>
-		                                                <btc-address-input v-model="receivingAddress"></btc-address-input>
+		                                                <btc-address-input v-model="receivingAddress" @change="prepareRedeem"></btc-address-input>
                                                 </div>
 		                                        </div>
 		                                    </div>
@@ -86,7 +86,7 @@
 		                                        <div class="col-sm-11 p0">
                                                 <div class="input-with-label text-left">
                                                     <span>Amount</span>
-		                                                <input v-model="amount" type="text" name="amount">
+		                                                <input v-model="amount" type="text" name="amount" @change="prepareRedeem">
                                                 </div>
 		                                        </div>
 		                                        <div class="col-sm-1 p0">
@@ -102,15 +102,36 @@
                                         <div v-if="accountDetails != null">
                                           <div class="row">
                                               <div class="input-with-label text-left">
-                                                  <span>Public Keys</span>
+                                                  <span>Available Balance</span>
+                                                  <input v-model="accountDetails.balance" type="text" name="amount" v-bind:disabled="true">
+  		                                        </div>
+  		                                    </div>
+                                          <div class="row">
+                                              <div class="input-with-label text-left">
+                                                  <span>Account Public Keys</span>
   		                                            <div class="select-option col-sm-12 p0">
   		                                                <i class="ti-angle-down"></i>
-  		                                                <select v-model="tokenType" name="currency">
-  		                                                    <option v-for="(v,k) in accountDetails.guard.keys" :value="k">{{v}}</option>
+  		                                                <select v-model="publicKey" name="pub-key" @change="prepareRedeem">
+  		                                                    <option v-for="(v,k) in accountDetails.guard.keys" :value="v">{{v}}</option>
   		                                                </select>
   		                                            </div>
   		                                        </div>
   		                                    </div>
+
+                                          <div v-if="txReady()">
+                                            <div class="row">
+                                                <div class="input-with-label text-left">
+                                                    <span>Transaction Hash</span>
+                                                    <input v-model="hash" type="text" name="amount" v-bind:disabled="true">
+    		                                        </div>
+    		                                    </div>
+                                            <div class="row">
+                                                <div class="input-with-label text-left">
+                                                    <span>Enter Private Key or Signature</span>
+                                                    <input v-model="sig" type="text" name="amount" @change="localRedeem">
+    		                                        </div>
+    		                                    </div>
+                                          </div>
                                         </div>
 
                                         <div class="row">
@@ -167,9 +188,9 @@
 		                                    <div class="row">
 		                                        <div class="col-sm-12 p0">
                                                 <button type="submit"
-                                                        v-on:click="prepareRedeem()"
-                                                        v-bind:class="formValid() ? '' : 'disabled'"
-                                                        v-bind:disabled="!formValid()">Redeem Tokens</button>
+                                                        v-on:click="sendRedeem()"
+                                                        v-bind:class="sendReady() ? '' : 'disabled'"
+                                                        v-bind:disabled="!sendReady()">Redeem Tokens</button>
 		                                        </div>
 		                                    </div>
                                     </div> <!-- Stage 0 component -->

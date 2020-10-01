@@ -271,50 +271,93 @@ var redeemApp = new Vue({
         sendMax: false,
         cmd: null,
         accountDetails: null,
-        errMsg: null
+        errMsg: null,
+        publicKey: null,
+        hash: null,
+        sig: null
     },
     computed: {
         txFeePercent() {
             return this.tokens[this.tokenType]["fee"] * 100.0;
         },
         txMin() {
+            console.log('here')
             return this.tokens[this.tokenType]["min"];
         }
     },
     methods: {
-        formValid() {
-            return this.receivingAddress != null
-                && this.sendingAccount != null
-                && this.errMsg === null
-                && ((this.amount != null && this.amount != '') || this.sendMax);
+        localReady() {
+            return this.txReady()
+              && this.sig !== null
+        },
+        sendReady() {
+          return this.localReady()
+        },
+        txReady() {
+          return this.receivingAddress != null
+              && this.sendingAccount != null
+              && this.errMsg === null
+              && !isNaN(this.amount)
+              && this.publicKey !== null
+              && ((this.amount != null && this.amount != '') || this.sendMax);
         },
         maxAmount() {
           this.amount = this.accountDetails.balance;
         },
-        prepareRedeem() {
+        convertDecimal(decimal) {
+          decimal = decimal.toString();
+          if (decimal[0] === ".") {return "0" + decimal}
+          if (decimal.includes('.')) { return decimal }
+          if ((decimal / Math.floor(decimal)) === 1) {
+            decimal = decimal + ".0"
+          }
+          return decimal
+        },
+        mkReq(cmd) {
+         return {
+             headers: {
+                 "Content-Type": "application/json"
+             },
+             method: "POST",
+             body: JSON.stringify(cmd)
+         };
+       },
+        async prepareRedeem() {
+            if (!this.txReady()) { return }
             const d = new Date();
             const dStr = d.toISOString();
-            const code = '(kbtc.sell-token "' + this.txb.account + '" (read-keyset "ks") "' + dStr + '")';
-            this.cmd = {
-                    "pactCode": code,
-                    "envData": {"ks": this.txb.keyset}
+            const code = `(kbtc.sell-token ${JSON.stringify(this.receivingAddress)} ${JSON.stringify(dStr)} ${JSON.stringify(this.sendingAccount)} ${this.convertDecimal(this.amount)})`
+            const m = Pact.lang.mkMeta(this.sendingAccount, "0", 0.00001, 600, Math.round((new Date).getTime()/1000)-60, 28800);
+            const sendCmd = {
+                 pactCode: code,
+                 keyPairs: [{publicKey: this.publicKey, secretKey: null, clist: [{name: "coin.GAS", args: []}]}],
+                 meta: m,
+                 networkId: "blah",
             };
-            // TODO properly get the chainwebversion and the chain ID
-            //var res = Pact.fetch.local(this.cmd, this.node + '/chainweb/0.0/mainnet01/chain/0/pact');
-            var res = Pact.fetch.local(this.cmd, this.node);
-            res.then(v => {this.requestId = v.result.data['request-id']; this.stage += 1;},
-                     e => {this.errMsg = 'Error contacting node (' + e + ')'; });
+            this.cmd = Pact.simple.exec.createCommand( sendCmd.keyPairs, sendCmd.nonce, sendCmd.pactCode,
+                                           sendCmd.envData, sendCmd.meta, sendCmd.networkId)
+            this.hash = this.cmd.cmds[0].hash
         },
-        sendMintRequest() {
-            Pact.fetch.send(this.cmd, this.node);
-            this.stage += 1;
+        async localRedeem() {
+          var finalSig = this.sig
+          if (this.sig.length === 64) {
+            const kp = {
+              publicKey: this.publicKey,
+              secretKey: this.sig
+            }
+            finalSig = Pact.crypto.sign(this.hash, kp)
+          }
+          this.cmd.cmds[0].sigs = [finalSig]
+          console.log(this.cmd)
+          const local = await fetch(`${this.node}/api/v1/local`, this.mkReq({cmds: this.cmd.cmds}));
+          console.log(local)
         },
         async getAccount() {
           try {
-            cmd = {
+            var acctCmd = {
               "pactCode": `(kbtc.details ${JSON.stringify(this.sendingAccount)})`
             }
-            var res  = await Pact.fetch.local(cmd, this.node)
+            var res  = await Pact.fetch.local(acctCmd, this.node)
             if (res.result.status === 'success') {
               this.accountDetails = res.result.data;
               console.log(res.result.data.guard.keys)
@@ -324,15 +367,11 @@ var redeemApp = new Vue({
               this.accountDetails = null;
             }
           } catch (e) {
-            console.log(e)
             this.errMsg = 'account does not exist'
             this.accountDetails = null;
           }
         }
     },
-   //  beforeMount(){
-   //    this.getAccount();
-   // },
 });
 
 var poaApp = new Vue({
