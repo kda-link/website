@@ -115,7 +115,7 @@
 
                                           <div v-for="(v,k) in accountDetails.guard.keys" class="row">
                                               <div class="col-sm-1">
-                                                  <input class="checkbox p0" type="checkbox" :value="v">
+                                                  <input class="checkbox p0" type="checkbox" :value="v" v-model="selectedKeys" @change="prepareRedeem">
                                               </div>
                                               <div class="col-sm-11">
                                                   <span>{{v}}</span>
@@ -131,12 +131,14 @@
                                                     <input v-model="hash" type="text" name="amount" v-bind:disabled="true">
     		                                        </div>
     		                                    </div>
-                                            <div class="row">
-                                                <div class="input-with-label text-left">
-                                                    <span>Enter Private Key or Signature</span>
-                                                    <input v-model="sig" type="text" name="amount" @change="localRedeem">
-    		                                        </div>
-    		                                    </div>
+                                            <div v-for="(v,k) in selectedKeys" class="row">
+                                              <div class="row">
+                                                  <div class="input-with-label text-left">
+                                                      <span>Private Key or Signature {{ v.substring(0,4) }}...{{ v.substring(v.length-4) }} </span>
+                                                      <input v-model="sigs[k]" type="text" name="amount" @change="localRedeem">
+      		                                        </div>
+      		                                    </div>
+                                            </div>
                                           </div>
                                         </div>
 
