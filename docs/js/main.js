@@ -273,8 +273,10 @@ var redeemApp = new Vue({
         accountDetails: null,
         errMsg: null,
         publicKey: null,
+        selectedKeys: [],
         hash: null,
-        sig: null
+        sig: null,
+        sigs: null
     },
     computed: {
         txFeePercent() {
@@ -288,9 +290,11 @@ var redeemApp = new Vue({
     methods: {
         localReady() {
             return this.txReady()
-              && this.sig !== null
+              && this.sigs !== null
         },
         sendReady() {
+          //finish to set this up
+          //must check localRedeem was positive
           return this.localReady()
         },
         txReady() {
@@ -298,7 +302,7 @@ var redeemApp = new Vue({
               && this.sendingAccount != null
               && this.errMsg === null
               && !isNaN(this.amount)
-              && this.publicKey !== null
+              && this.selectedKeys.length > 0
               && ((this.amount != null && this.amount != '') || this.sendMax);
         },
         maxAmount() {
@@ -330,27 +334,41 @@ var redeemApp = new Vue({
             const m = Pact.lang.mkMeta(this.sendingAccount, "0", 0.00001, 600, Math.round((new Date).getTime()/1000)-60, 28800);
             const sendCmd = {
                  pactCode: code,
-                 keyPairs: [{publicKey: this.publicKey, secretKey: null, clist: [{name: "coin.GAS", args: []}]}],
+                 // keyPairs: [{publicKey: this.publicKey, secretKey: null, clist: [{name: "coin.GAS", args: []}]}],
+                 keyPairs: this.selectedKeys.map((key, i) => { return { publicKey: key, secretKey: null, clist: [] } }),
                  meta: m,
                  networkId: "blah",
             };
             this.cmd = Pact.simple.exec.createCommand( sendCmd.keyPairs, sendCmd.nonce, sendCmd.pactCode,
                                            sendCmd.envData, sendCmd.meta, sendCmd.networkId)
             this.hash = this.cmd.cmds[0].hash
+            this.sigs = new Array(this.selectedKeys.length)
         },
         async localRedeem() {
-          var finalSig = this.sig
-          if (this.sig.length === 64) {
-            const kp = {
-              publicKey: this.publicKey,
-              secretKey: this.sig
+          console.log(this.selectedKeys)
+          var finalSigs = this.sigs
+          finalSigs.map((sig, i) => {
+            if (sig.length === 64) {
+              const kp = {
+                publicKey: this.selectedKeys[i],
+                secretKey: sig
+              }
+              return Pact.crypto.sign(this.hash, kp)
+            } else {
+              return sig
             }
-            finalSig = Pact.crypto.sign(this.hash, kp)
-          }
-          this.cmd.cmds[0].sigs = [finalSig]
+          })
+          this.cmd.cmds[0].sigs = finalSigs
           console.log(this.cmd)
           const local = await fetch(`${this.node}/api/v1/local`, this.mkReq({cmds: this.cmd.cmds}));
           console.log(local)
+        },
+        async sendRedeem(){
+          try {
+            const send = await fetch(`${this.node}/api/v1/send`, this.mkReq({cmds: this.cmd.cmds}));
+          } catch (e) {
+            console.log(e)
+          }
         },
         async getAccount() {
           try {
@@ -406,13 +424,13 @@ var poaApp = new Vue({
     },
     async getKbtcCirculation() {
       //TODO implement get-total in smart contract
-      const code = '(' + this.kbtcAddress + ".get-total" + ')';
+      const code = '(' + this.kbtcAddress + ".get-supply" + ')';
       const cmd = {
         "pactCode": code
       }
       try {
         var res = await Pact.fetch.local(cmd, this.node);
-        this.kbtcAmount = res.result.data['total-circulation']
+        this.kbtcAmount = res.result.data['supply']
       } catch (e) {
         this.kbtcAmount = 'Error contacting node (' + e + ')';
       }
