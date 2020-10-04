@@ -106,17 +106,23 @@
                                                   <input v-model="accountDetails.balance" type="text" name="amount" v-bind:disabled="true">
   		                                        </div>
   		                                    </div>
+
                                           <div class="row">
                                               <div class="input-with-label text-left">
                                                   <span>Account Public Keys</span>
-  		                                            <div class="select-option col-sm-12 p0">
-  		                                                <i class="ti-angle-down"></i>
-  		                                                <select v-model="publicKey" name="pub-key" @change="prepareRedeem">
-  		                                                    <option v-for="(v,k) in accountDetails.guard.keys" :value="v">{{v}}</option>
-  		                                                </select>
-  		                                            </div>
+                                              </div>
+                                          </div>
+
+                                          <div v-for="(v,k) in accountDetails.guard.keys" class="row">
+                                              <div class="col-sm-1">
+                                                  <input class="checkbox p0" type="checkbox" :value="v">
+                                              </div>
+                                              <div class="col-sm-11">
+                                                  <span>{{v}}</span>
   		                                        </div>
   		                                    </div>
+
+                                          <br/>
 
                                           <div v-if="txReady()">
                                             <div class="row">
