@@ -325,7 +325,13 @@ var redeemApp = new Vue({
              method: "POST",
              body: JSON.stringify(cmd)
          };
-       },
+        },
+        isKeysetAmbiguous(ks) {
+            const val = !(ks.pred == 'keys-all' || ks.keys.length == 1);
+            console.log(ks);
+            console.log('isKeysetAmbiguous returning ' + val);
+            return val;
+        },
         async prepareRedeem() {
             if (!this.txReady()) { return }
             const d = new Date();

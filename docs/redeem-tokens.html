@@ -107,19 +107,21 @@
   		                                        </div>
   		                                    </div>
 
-                                          <div class="row">
-                                              <div class="input-with-label text-left">
-                                                  <span>Account Public Keys</span>
+                                          <div v-if="this.isKeysetAmbiguous(accountDetails.guard)">
+                                              <div class="row">
+                                                  <div class="input-with-label text-left">
+                                                      <span>Keys to Sign With</span>
+                                                  </div>
                                               </div>
-                                          </div>
 
-                                          <div v-for="(v,k) in accountDetails.guard.keys" class="row">
-                                              <div class="col-sm-1">
-                                                  <input class="checkbox p0" type="checkbox" :value="v" v-model="selectedKeys" @change="prepareRedeem">
+                                              <div v-for="(v,k) in accountDetails.guard.keys" class="row">
+                                                  <div class="col-sm-1">
+                                                      <input class="checkbox p0" type="checkbox" :value="v" v-model="selectedKeys" @change="prepareRedeem">
+                                                  </div>
+                                                  <div class="col-sm-11">
+                                                      <span>{{v}}</span>
+                                                  </div>
                                               </div>
-                                              <div class="col-sm-11">
-                                                  <span>{{v}}</span>
-  		                                        </div>
   		                                    </div>
 
                                           <br/>
