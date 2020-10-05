@@ -318,6 +318,7 @@ var redeemApp = new Vue({
           return decimal
         },
         mkReq(cmd) {
+         console.log(cmd)
          return {
              headers: {
                  "Content-Type": "application/json"
@@ -326,8 +327,13 @@ var redeemApp = new Vue({
              body: JSON.stringify(cmd)
          };
         },
-        isKeysetAmbiguous(ks) {
-            return !(ks.pred == 'keys-all' || ks.keys.length == 1);
+        setKeyset(ks) {
+            // if (ks.keys.length === 1) {
+            //   console.log(ks.keys)
+            //   this.selectedKeys = ks.keys[0];
+            // } else {
+            //   this.selectedKeys = []
+            // }
         },
         async prepareRedeem() {
             if (!this.txReady()) { return }
@@ -340,6 +346,7 @@ var redeemApp = new Vue({
                  // keyPairs: [{publicKey: this.publicKey, secretKey: null, clist: [{name: "coin.GAS", args: []}]}],
                  keyPairs: this.selectedKeys.map((key, i) => { return { publicKey: key, secretKey: null, clist: [] } }),
                  meta: m,
+                 //TO FIX!!!
                  networkId: "blah",
             };
             this.cmd = Pact.simple.exec.createCommand( sendCmd.keyPairs, sendCmd.nonce, sendCmd.pactCode,
@@ -348,20 +355,27 @@ var redeemApp = new Vue({
             this.sigs = new Array(this.selectedKeys.length)
         },
         async localRedeem() {
-          console.log(this.selectedKeys)
-          var finalSigs = this.sigs
-          finalSigs.map((sig, i) => {
+          // var finalSigs = this.sigs
+          console.log(this.sigs)
+          console.log(this.hash)
+          this.sigs.map((sig, i) => {
             if (sig.length === 64) {
+              console.log('here');
               const kp = {
                 publicKey: this.selectedKeys[i],
                 secretKey: sig
               }
-              return Pact.crypto.sign(this.hash, kp)
+              console.log(Pact.crypto.sign(this.hash, kp))
+              // return { "sig": Pact.crypto.sign(this.hash, kp).sig }
+              this.cmd.cmds[0].sigs.push({ "sig": Pact.crypto.sign(this.hash, kp).sig })
             } else {
-              return sig
+              console.log(sig)
+              // return { "sig": sig }
+              this.cmd.cmds[0].sigs.push({ "sig": sig })
             }
           })
-          this.cmd.cmds[0].sigs = finalSigs
+          // console.log(finalSigs)
+          // this.cmd.cmds[0].sigs = finalSigs
           console.log(this.cmd)
           const local = await fetch(`${this.node}/api/v1/local`, this.mkReq({cmds: this.cmd.cmds}));
           console.log(local)
@@ -381,8 +395,12 @@ var redeemApp = new Vue({
             var res  = await Pact.fetch.local(acctCmd, this.node)
             if (res.result.status === 'success') {
               this.accountDetails = res.result.data;
-              console.log(res.result.data.guard.keys)
               this.errMsg = null;
+              // if (this.accountDetails.guard.keys.length === 1) {
+              //   this.selectedKeys = this.accountDetails.guard.keys
+              // } else {
+              //   this.selectedKeys = []
+              // }
             } else {
               this.errMsg = 'account does not exist';
               this.accountDetails = null;

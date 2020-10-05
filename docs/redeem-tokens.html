@@ -107,7 +107,7 @@
   		                                        </div>
   		                                    </div>
 
-                                          <div v-if="this.isKeysetAmbiguous(accountDetails.guard)">
+                                          <!-- <div v-if="isKeysetAmbiguous(accountDetails.guard)"> -->
                                               <div class="row">
                                                   <div class="input-with-label text-left">
                                                       <span>Keys to Sign With</span>
@@ -122,7 +122,7 @@
                                                       <span>{{v}}</span>
                                                   </div>
                                               </div>
-  		                                    </div>
+  		                                    <!-- </div> -->
 
                                           <br/>
 
@@ -133,7 +133,7 @@
                                                     <input v-model="hash" type="text" name="amount" v-bind:disabled="true">
     		                                        </div>
     		                                    </div>
-                                            <div v-for="(v,k) in selectedKeys" class="row">
+                                            <div v-for="(v,k) in selectedKeys">
                                               <div class="row">
                                                   <div class="input-with-label text-left">
                                                       <span>Private Key or Signature {{ v.substring(0,4) }}...{{ v.substring(v.length-4) }} </span>
