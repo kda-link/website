@@ -327,10 +327,7 @@ var redeemApp = new Vue({
          };
         },
         isKeysetAmbiguous(ks) {
-            const val = !(ks.pred == 'keys-all' || ks.keys.length == 1);
-            console.log(ks);
-            console.log('isKeysetAmbiguous returning ' + val);
-            return val;
+            return !(ks.pred == 'keys-all' || ks.keys.length == 1);
         },
         async prepareRedeem() {
             if (!this.txReady()) { return }
