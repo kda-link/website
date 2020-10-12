@@ -24,7 +24,7 @@ Vue.component('btc-address-input', {
     methods: {
         isValidBtcAddress(v) {
             if ( v != null ) {
-                var addr = v.match(/^[13][1-9abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ]{24,33}$/);
+                var addr = v.match(/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/);
                 return addr != null;
             } else {
                 return false;
@@ -203,7 +203,7 @@ Vue.component('accordion', {
 });
 
 const allTokens = {
-    "BTC" : { "fee": 0.002, "min": 0.01, "address": "mgM9CyJ5PLxKcr1sEXsjR7G4hdUM9j1qpq" },
+    "BTC" : { "fee": 0.002, "min": 0.01, "address": "35hK24tcLEWcgNA4JxpvbkNkoAcDGqQPsP" },
     "ETH" : { "fee": 0.002, "min": 0.3, "address": "not implemented yet" },
     "DAI" : { "fee": 0.002, "min": 100, "address": "not implemented yet" },
     "USDC" : { "fee": 0.002, "min": 100, "address": "not implemented yet" }
@@ -270,13 +270,19 @@ var redeemApp = new Vue({
         amount: null,
         sendMax: false,
         cmd: null,
+        code: null,
+        meta: null,
         accountDetails: null,
         errMsg: null,
         publicKey: null,
         selectedKeys: [],
         hash: null,
         sig: null,
-        sigs: null
+        sigs: [],
+        localSuccess: false,
+        date: null,
+        //CHANGE
+        networkId: null
     },
     computed: {
         txFeePercent() {
@@ -289,13 +295,19 @@ var redeemApp = new Vue({
     },
     methods: {
         localReady() {
-            return this.txReady()
-              && this.sigs !== null
+            if ( this.sigs ) {
+              const filt = this.sigs.filter(sig => sig.length === 128 || sig.length === 64)
+              return this.txReady()
+                && filt.length === this.selectedKeys.length
+            } else {
+              return false
+            }
         },
         sendReady() {
           //finish to set this up
           //must check localRedeem was positive
           return this.localReady()
+            && this.localSuccess
         },
         txReady() {
           return this.receivingAddress != null
@@ -303,10 +315,17 @@ var redeemApp = new Vue({
               && this.errMsg === null
               && !isNaN(this.amount)
               && this.selectedKeys.length > 0
+              && this.receivingAddress.match(/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/)
               && ((this.amount != null && this.amount != '') || this.sendMax);
         },
         maxAmount() {
           this.amount = this.accountDetails.balance;
+        },
+        incStage() {
+          this.stage += 1;
+        },
+        decStage() {
+          this.stage -= 1;
         },
         convertDecimal(decimal) {
           decimal = decimal.toString();
@@ -327,58 +346,67 @@ var redeemApp = new Vue({
              body: JSON.stringify(cmd)
          };
         },
-        setKeyset(ks) {
-            // if (ks.keys.length === 1) {
-            //   console.log(ks.keys)
-            //   this.selectedKeys = ks.keys[0];
-            // } else {
-            //   this.selectedKeys = []
-            // }
+        mkSig(kp){
+          var cmdJSON = {
+            networkId: this.networkId,
+            payload: {
+              exec: {
+                data: {},
+                code: this.code
+              }
+            },
+            signers: this.selectedKeys.map((key, i) => { return { publicKey: key, secretKey: null, clist: [{name: "coin.GAS", args: []}] } }),
+            meta: this.meta,
+            nonce: this.date
+          };
+          var cmd = JSON.stringify(cmdJSON);
+          var sig = Pact.crypto.sign(cmd, kp).sig;
+          return sig
         },
         async prepareRedeem() {
-            if (!this.txReady()) { return }
-            const d = new Date();
-            const dStr = d.toISOString();
-            const code = `(kbtc.sell-token ${JSON.stringify(this.receivingAddress)} ${JSON.stringify(dStr)} ${JSON.stringify(this.sendingAccount)} ${this.convertDecimal(this.amount)})`
-            const m = Pact.lang.mkMeta(this.sendingAccount, "0", 0.00001, 600, Math.round((new Date).getTime()/1000)-60, 28800);
-            const sendCmd = {
-                 pactCode: code,
-                 // keyPairs: [{publicKey: this.publicKey, secretKey: null, clist: [{name: "coin.GAS", args: []}]}],
-                 keyPairs: this.selectedKeys.map((key, i) => { return { publicKey: key, secretKey: null, clist: [] } }),
-                 meta: m,
-                 //TO FIX!!!
-                 networkId: "blah",
-            };
-            this.cmd = Pact.simple.exec.createCommand( sendCmd.keyPairs, sendCmd.nonce, sendCmd.pactCode,
-                                           sendCmd.envData, sendCmd.meta, sendCmd.networkId)
+            if (!this.txReady() ) { return }
+            this.code = `(kbtc.sell-token ${JSON.stringify(this.receivingAddress)} ${JSON.stringify(this.date)} ${JSON.stringify(this.sendingAccount)} ${this.convertDecimal(this.amount)})`
+            this.meta = Pact.lang.mkMeta(this.sendingAccount, "0", 0.00001, 600, parseFloat(this.date)-60, 28800);
+            this.cmd = Pact.simple.exec.createCommand(
+              this.selectedKeys.map((key, i) => { return { publicKey: key, secretKey: null, clist: [{name: "coin.GAS", args: []}] } }),
+              this.date,
+              this.code,
+              {},
+              this.meta,
+              //FIX TO REAL NETWORK ID
+              this.networkId
+            )
             this.hash = this.cmd.cmds[0].hash
-            this.sigs = new Array(this.selectedKeys.length)
+            // this.sigs = new Array(this.selectedKeys.length)
+            this.sigs = []
         },
         async localRedeem() {
-          // var finalSigs = this.sigs
+          // await this.prepareRedeem()
           console.log(this.sigs)
           console.log(this.hash)
-          this.sigs.map((sig, i) => {
+          console.log(this.selectedKeys.length)
+          const sigs = [];
+          this.selectedKeys.map((sig, i) => {
             if (sig.length === 64) {
-              console.log('here');
               const kp = {
                 publicKey: this.selectedKeys[i],
                 secretKey: sig
               }
-              console.log(Pact.crypto.sign(this.hash, kp))
-              // return { "sig": Pact.crypto.sign(this.hash, kp).sig }
-              this.cmd.cmds[0].sigs.push({ "sig": Pact.crypto.sign(this.hash, kp).sig })
+              sigs.push({ "sig": this.mkSig(kp) })
             } else {
-              console.log(sig)
-              // return { "sig": sig }
-              this.cmd.cmds[0].sigs.push({ "sig": sig })
+              sigs.push({ "sig": sig })
             }
+            this.cmd.cmds[0].sigs = sigs
           })
-          // console.log(finalSigs)
-          // this.cmd.cmds[0].sigs = finalSigs
           console.log(this.cmd)
-          const local = await fetch(`${this.node}/api/v1/local`, this.mkReq({cmds: this.cmd.cmds}));
-          console.log(local)
+          const local = await fetch(`${this.node}/api/v1/local`, this.mkReq(this.cmd.cmds[0]));
+          const res = await local.json()
+          console.log(res.result)
+          if (res.result.status === 'success') {
+            this.localSuccess = true
+          } else {
+            this.localSuccess = false
+          }
         },
         async sendRedeem(){
           try {
@@ -411,6 +439,11 @@ var redeemApp = new Vue({
           }
         }
     },
+    beforeMount(){
+      const d = new Date();
+      this.date = d.toISOString();
+      console.log(hex2bin("sssss"))
+   },
 });
 
 var poaApp = new Vue({
