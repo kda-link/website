@@ -289,7 +289,6 @@ var redeemApp = new Vue({
             return this.tokens[this.tokenType]["fee"] * 100.0;
         },
         txMin() {
-            console.log('here')
             return this.tokens[this.tokenType]["min"];
         }
     },
@@ -368,7 +367,7 @@ var redeemApp = new Vue({
             this.code = `(kbtc.sell-token ${JSON.stringify(this.receivingAddress)} ${JSON.stringify(this.date)} ${JSON.stringify(this.sendingAccount)} ${this.convertDecimal(this.amount)})`
             this.meta = Pact.lang.mkMeta(this.sendingAccount, "0", 0.00001, 600, parseFloat(this.date)-60, 28800);
             this.cmd = Pact.simple.exec.createCommand(
-              this.selectedKeys.map((key, i) => { return { publicKey: key, secretKey: null, clist: [{name: "coin.GAS", args: []}] } }),
+              this.selectedKeys.map((key, i) => { return { publicKey: key, secretKey: null, clist: [] } }),
               this.date,
               this.code,
               {},
@@ -382,24 +381,28 @@ var redeemApp = new Vue({
         },
         async localRedeem() {
           // await this.prepareRedeem()
-          console.log(this.sigs)
-          console.log(this.hash)
-          console.log(this.selectedKeys.length)
-          const sigs = [];
-          this.selectedKeys.map((sig, i) => {
-            if (sig.length === 64) {
+          const c = this.cmd.cmds[0].cmd;
+          var theSigs = [];
+          for ( var i = 0; i < this.selectedKeys.length; i++ ) {
+            const pk = this.selectedKeys[i];
+            var sigOrPrivateKey = this.sigs[i];
+            if (sigOrPrivateKey.length === 64) {
               const kp = {
-                publicKey: this.selectedKeys[i],
-                secretKey: sig
+                publicKey: pk,
+                secretKey: sigOrPrivateKey
               }
-              sigs.push({ "sig": this.mkSig(kp) })
+              theSigs.push({sig: Pact.crypto.sign(c, kp).sig});
             } else {
-              sigs.push({ "sig": sig })
+              theSigs.push({sig: sigOrPrivateKey});
             }
-            this.cmd.cmds[0].sigs = sigs
-          })
+          }
           console.log(this.cmd)
-          const local = await fetch(`${this.node}/api/v1/local`, this.mkReq(this.cmd.cmds[0]));
+          const finalCmd = {
+            hash: this.hash,
+            cmd: c,
+            sigs: theSigs
+          };
+          const local = await fetch(`${this.node}/api/v1/local`, this.mkReq(finalCmd));
           const res = await local.json()
           console.log(res.result)
           if (res.result.status === 'success') {
