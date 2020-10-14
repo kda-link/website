@@ -279,10 +279,14 @@ var redeemApp = new Vue({
         hash: null,
         sig: null,
         sigs: [],
-        localSuccess: false,
+        localStatus: null,
+        sendStatus: null,
         date: null,
         //CHANGE
-        networkId: null
+        networkId: null,
+        sendCmd: null,
+        reqKey: null,
+        reqId: null
     },
     computed: {
         txFeePercent() {
@@ -302,12 +306,6 @@ var redeemApp = new Vue({
               return false
             }
         },
-        sendReady() {
-          //finish to set this up
-          //must check localRedeem was positive
-          return this.localReady()
-            && this.localSuccess
-        },
         txReady() {
           return this.receivingAddress != null
               && this.sendingAccount != null
@@ -325,6 +323,7 @@ var redeemApp = new Vue({
         },
         decStage() {
           this.stage -= 1;
+          this.errMsg = null;
         },
         convertDecimal(decimal) {
           decimal = decimal.toString();
@@ -372,15 +371,12 @@ var redeemApp = new Vue({
               this.code,
               {},
               this.meta,
-              //FIX TO REAL NETWORK ID
               this.networkId
             )
             this.hash = this.cmd.cmds[0].hash
-            // this.sigs = new Array(this.selectedKeys.length)
             this.sigs = []
         },
         async localRedeem() {
-          // await this.prepareRedeem()
           const c = this.cmd.cmds[0].cmd;
           var theSigs = [];
           for ( var i = 0; i < this.selectedKeys.length; i++ ) {
@@ -402,21 +398,48 @@ var redeemApp = new Vue({
             cmd: c,
             sigs: theSigs
           };
-          const local = await fetch(`${this.node}/api/v1/local`, this.mkReq(finalCmd));
-          const res = await local.json()
-          console.log(res.result)
-          if (res.result.status === 'success') {
-            this.localSuccess = true
-          } else {
-            this.localSuccess = false
+          try {
+            const local = await fetch(`${this.node}/api/v1/local`, this.mkReq(finalCmd));
+            const res = await local.json()
+            console.log(res.result)
+            if (res.result.status === 'success') {
+              this.localStatus = 'success'
+              this.sendCmd = { cmds: [finalCmd] }
+            } else {
+              this.localStatus = 'failure'
+              this.errMsg = res.result.error.message;
+            }
+          } catch (e) {
+            this.localStatus = 'failure'
+            console.log(e)
           }
         },
         async sendRedeem(){
           try {
-            const send = await fetch(`${this.node}/api/v1/send`, this.mkReq({cmds: this.cmd.cmds}));
+            const sendRes = await fetch(`${this.node}/api/v1/send`, this.mkReq(this.sendCmd));
+            const sendJson = await sendRes.json();
+            this.reqKey = sendJson.requestKeys[0]
+            this.incStage();
+            await this.listenRedeem()
           } catch (e) {
             console.log(e)
           }
+        },
+        async listenRedeem() {
+          try {
+            this.sendStatus = 'pending'
+            const res = await Pact.fetch.listen({listen: this.reqKey}, this.node)
+            if ( res.result.status === 'success' ) {
+              this.sendStatus = 'success'
+              this.reqId = res.result.data["request-id"]
+            } else {
+              this.sendStatus = 'failure'
+            }
+          } catch (e) {
+            console.log(e)
+            this.sendStatus = 'failure'
+          }
+
         },
         async getAccount() {
           try {
@@ -427,11 +450,6 @@ var redeemApp = new Vue({
             if (res.result.status === 'success') {
               this.accountDetails = res.result.data;
               this.errMsg = null;
-              // if (this.accountDetails.guard.keys.length === 1) {
-              //   this.selectedKeys = this.accountDetails.guard.keys
-              // } else {
-              //   this.selectedKeys = []
-              // }
             } else {
               this.errMsg = 'account does not exist';
               this.accountDetails = null;
@@ -445,7 +463,6 @@ var redeemApp = new Vue({
     beforeMount(){
       const d = new Date();
       this.date = d.toISOString();
-      console.log(hex2bin("sssss"))
    },
 });
 
